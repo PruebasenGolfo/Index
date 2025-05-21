@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulario de Presentismo</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #00205B, #A51C84);
+      color: #fff;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2em;
+      margin: 30px 0;
+    }
+
+    form {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    input[type="tel"],
+    input[type="file"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: none;
+      box-sizing: border-box;
+    }
+
+    input[readonly] {
+      background-color: #e0e0e0;
+      color: #000;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      background-color: #A51C84;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #7f1664;
+    }
+  </style>
+</head>
+<body>
+  <h1>📋 Registro de Presentismo</h1>
+
+  <form id="presentismo-form">
+    <label>Fecha:</label>
+    <input type="date" name="fecha" required>
+
+    <label>Hora Presente:</label>
+    <input type="time" name="hora_presente" required>
+
+    <label>Apellido y Nombre:</label>
+    <input type="text" name="apellido_nombre" required>
+
+    <label>DNI:</label>
+    <input type="text" name="dni" required>
+
+    <label>Sitio:</label>
+    <input type="text" name="sitio" required>
+
+    <label>Operador:</label>
+    <select name="operador" required>
+      <option value="">Seleccione...</option>
+      <option value="Policía">Policía</option>
+      <option value="Seguridad Privada">Seguridad Privada</option>
+    </select>
+
+    <label>Horarios de Servicio:</label>
+    <select name="horarios_servicio" required>
+      <option value="">Seleccione...</option>
+      <option>05HS A 15HS</option>
+      <option>24HS</option>
+      <option>07HS A 19HS</option>
+      <option>09HS A 21HS</option>
+      <option>19HS A 07HS</option>
+      <option>20HS A 06HS</option>
+      <option>21HS A 08HS</option>
+      <option>21HS A 06HS</option>
+      <option>22HS A 06HS</option>
+    </select>
+
+    <label>Turno de Seguridad:</label>
+    <select name="turno_seguridad" required>
+      <option value="">Seleccione...</option>
+      <option>1200-2000</option>
+      <option>1400-2200</option>
+      <option>1900-0700</option>
+      <option>2000-0600</option>
+      <option>2000-0800</option>
+      <option>2100-0600</option>
+      <option>2100-0900</option>
+      <option>2200-0600</option>
+    </select>
+
+    <label>Teléfono / Celular:</label>
+    <input type="tel" name="telefono">
+
+    <label>Novedad (S/N):</label>
+    <input type="text" name="novedad">
+
+    <label>Ubicación GPS:</label>
+    <input type="text" name="ubicacion" id="ubicacion" readonly>
+    <button type="button" onclick="abrirMapa()">📍 Ver en Google Maps</button>
+
+    <label>Subir Imagen:</label>
+    <input type="file" name="imagen" accept="image/*" capture="environment" required>
+
+    <button type="submit">Enviar</button>
+  </form>
+
+  <script>
+    const webAppUrl = 'https://script.google.com/macros/s/AKfycbziiaPZBzZG50WeNlZVjLRGdolgHHxvMX8g0b1j87rfgvIEZuMLg62Bm1ZWqqBBb1mM/exec';
+
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const coords = position.coords.latitude + ", " + position.coords.longitude;
+        document.getElementById("ubicacion").value = coords;
+      },
+      function(error) {
+        alert("⚠️ No se pudo obtener la ubicación GPS.");
+      }
+    );
+
+    function abrirMapa() {
+      const ubicacion = document.getElementById("ubicacion").value;
+      if (ubicacion) {
+        const url = "https://www.google.com/maps?q=" + encodeURIComponent(ubicacion);
+        window.open(url, "_blank");
+      } else {
+        alert("Ubicación no disponible aún.");
+      }
+    }
+
+    document.getElementById("presentismo-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const file = form.imagen.files[0];
+      const reader = new FileReader();
+
+      reader.onloadend = function() {
+        const base64 = reader.result.split(',')[1];
+        const data = new URLSearchParams();
+
+        data.append("fecha", form.fecha.value);
+        data.append("hora_presente", form.hora_presente.value);
+        data.append("apellido_nombre", form.apellido_nombre.value);
+        data.append("dni", form.dni.value);
+        data.append("sitio", form.sitio.value);
+        data.append("operador", form.operador.value);
+        data.append("horarios_servicio", form.horarios_servicio.value);
+        data.append("turno_seguridad", form.turno_seguridad.value);
+        data.append("telefono", form.telefono.value);
+        data.append("novedad", form.novedad.value);
+        data.append("ubicacion", form.ubicacion.value);
+        data.append("imagen", base64);
+
+        fetch(webAppUrl, {
+          method: "POST",
+          body: data
+        })
+        .then(res => res.text())
+        .then(txt => {
+          if (txt.includes("OK")) {
+            alert("✅ Registro enviado correctamente.");
+            form.reset();
+          } else {
+            alert("⚠️ Error en la respuesta: " + txt);
+          }
+        })
+        .catch(err => alert("❌ Error al enviar: " + err));
+      };
+
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
